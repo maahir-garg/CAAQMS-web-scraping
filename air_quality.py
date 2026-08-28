@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime
 from datetime import timedelta
@@ -73,8 +74,10 @@ def get_info(encoded_data):
     headers["Content-Type"] = "text/plain"
     headers["Accept"] = "q=0.8;application/json;q=0.9"
     headers["Referer"] = "https://airquality.cpcb.gov.in/ccr/"
-    headers[
-        "Cookie"] = 'REDACTED'
+    cookie = os.getenv("CAAQMS_COOKIE")
+    if not cookie:
+        raise RuntimeError("Set CAAQMS_COOKIE in the environment before running the scraper.")
+    headers["Cookie"] = cookie
     r = requests.post(
         "https://airquality.cpcb.gov.in/caaqms/fetch_table_data",
         headers=headers,
