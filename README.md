@@ -1,67 +1,56 @@
-# Python Script for Web Scraping Air Quality Data
-This Python script scrapes air quality data from a website and saves it to an Excel sheet.
+# CAAQMS air-quality data export
 
-## Functionality
-Reading Websites and IDs:
-The script reads a list of sites and details such as State, City, Site_ID from an Excel sheet ("sites_all.xlsx").
-This list can be modified to include different sites. 
+This Python script reads station metadata from `sites_all.xlsx`, requests tabular air-quality data from the CPCB CAAQMS service, and appends the results to `Final_AQI.xlsx`.
 
-### Creating Encoded Queries:
-For each site, the script generates an encoded query based on the from_date, to_date, state, city, station_id 
-using the function create_encoded_query.
+## Security
 
-### Web Scraping:
-The script retrieves HTML content from the website using the encoded queries in the function get_info.
+The script reads the request cookie from the `CAAQMS_COOKIE` environment variable. Treat this value as a secret.
 
-#### Updating CAPTCHA
-This is perhaps the most important part of the code to ensure it it actually running. \
-Click on [this link](https://airquality.cpcb.gov.in/ccr/#/caaqm-dashboard-all/caaqm-landing) to access the page. 
-<img width="1015" alt="Screenshot 2024-03-07 at 10 13 57 PM" src="https://github.com/maahir-garg/CAAQMS-web-scraping/assets/117061563/1f533df6-cdef-46e4-b67e-cdfbe1b7fa02">
+- Never paste cookies, session values, or credentials into source code.
+- Never commit a populated `.env` file.
+- Revoke or invalidate exposed session material before using the repository.
+- Run a full-history secret scan before treating the repository as clean.
 
- \
-Enter the correct captcha and then open the inspect panel by right clicking. \
-Next select networks -> ccr and choose headers 
+## Requirements
 
-<img width="1015" alt="Screenshot 2024-03-07 at 10 14 08 PM" src="https://github.com/maahir-garg/CAAQMS-web-scraping/assets/117061563/b0cf5441-f384-489c-afb0-c8d2ed405f47">
+- Python 3
+- pandas
+- requests
+- certifi
+- dataset
+- openpyxl
 
-Copy the Cookie element and paste in the headers
-```python
-headers["Cookie"] = '#paste copied element here and DONT remove the single quotations'
-```
+Install the dependencies in a virtual environment:
 
-### Data Extraction:
-The script extracts relevant air quality data from the HTML content. Function printing_lines
-
-#### Data Saving:
-The script saves the extracted data to a new Excel sheet ("Final_AQI.xlsx"). 
-
-## Installation and Usage
-
-### Install Requirements:
-This script requires the following Python libraries:
-pandas
-requests
-certifi
-You can install them using 
 ```bash
-pip install pandas 
-pip install requests 
-pip install certifi 
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas requests certifi dataset openpyxl
 ```
-### Download Files:
-Download the following files:
-air_quality.py: The Python script that performs the web scraping. \
-sites_all.xlsx: The Excel sheet containing the list all sites. \
-Final_AQI.xlsx: The Excel sheet storing the final output. 
 
-### Run the Script:
-Open a terminal and navigate to the directory containing the downloaded files.
-Run the following command:
-```bash 
+## Configuration
+
+Copy the example configuration and provide the current session value only in your local environment:
+
+```bash
+cp .env.example .env
+export CAAQMS_COOKIE="replace-with-a-current-local-value"
+```
+
+The `.env` file is ignored by Git. The script fails with a clear error when `CAAQMS_COOKIE` is missing.
+
+## Inputs and outputs
+
+- `sites_all.xlsx`: station metadata and parse status
+- `Final_AQI.xlsx`: generated workbook containing the collected readings
+- `air_quality.py`: request, parsing, and workbook-update logic
+
+Review the station list and date range in `air_quality.py` before running:
+
+```bash
 python air_quality.py
 ```
 
-### Output:
-The script will update the excel sheet ("Final_AQI.xlsx") in the same directory.
-This sheet will contain the extracted air quality data for all specified sites.
+## Limitations
 
+The upstream endpoint, CAPTCHA flow, request headers, and response format can change without notice. Use conservative request rates, comply with the service's terms, and validate generated workbooks before analysis.
